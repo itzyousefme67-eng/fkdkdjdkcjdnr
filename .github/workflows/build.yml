@@ -1,0 +1,30 @@
+name: Build JAR
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Unzip project
+        run: |
+          unzip -q Silk-source-LambDynamicLights-branding.zip -d proj
+          cd proj/*/
+          sed -i 's/[[:space:]]*#.*$//' gradle.properties
+          chmod +x gradlew
+
+      - name: Build
+        run: cd proj/*/ && ./gradlew build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: silk-jar
+          path: proj/*/build/libs/*.jar
